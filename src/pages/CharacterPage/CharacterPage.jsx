@@ -8,6 +8,8 @@ export const CharacterPage = () => {
   const [characters, setCharacters] = useState([]);
   // стейт для хранения ошибок (при запросах на сервер)
   const [error, setError] = useState(null);
+  // стейт для хранения состояния загрузки данных (при запросах на сервер)
+  const [loading, setLoading] = useState(true);
 
   // стейт для хранения информации для подгрузки следующих/предыдущих пачек персонажей
   const [info, setInfo] = useState({
@@ -19,6 +21,7 @@ export const CharacterPage = () => {
 
   // функция для запроса на сервер за данными по переданному url
   const fetchData = (url) => {
+    setLoading(true);
     axios
       .get(url)
       .then((res) => {
@@ -28,6 +31,9 @@ export const CharacterPage = () => {
       })
       .catch((err) => {
         setError(err.response.data.error);
+      })
+      .finally(() => {
+        setLoading(false);
       });
   };
 
@@ -65,11 +71,12 @@ export const CharacterPage = () => {
         onChange={searchHandler}
         placeholder="Search..."
       />
+      {loading && <div>Loading...</div>}
       {error && <div className="errorMessage">{error}</div>}
 
       {
         /* условный рендеринг - отрисуем карточки персонажей при условии, что массив данных с сервера не пустой и ошибок нет*/
-        !error && characters.length && (
+        !error && characters.length > 0 && (
           <>
             {
               <div className={s.characters}>
